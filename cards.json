@@ -1,11 +1,11 @@
 {
   "logos": {
-    "amex": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%232E6AE8'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EBCE%3C/text%3E%3C/svg%3E",
-    "gemini": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%237E3FF2'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EGEM%3C/text%3E%3C/svg%3E",
-    "sapphire": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%230B63CE'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3ESAP%3C/text%3E%3C/svg%3E",
-    "freedom": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%2300A86B'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EFRD%3C/text%3E%3C/svg%3E",
-    "boa": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23D90429'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EBOA%3C/text%3E%3C/svg%3E",
-    "qs": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%234A5568'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EQS%3C/text%3E%3C/svg%3E"
+    "amex": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%236366F1'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='system-ui' font-size='18' fill='%23ffffff'%3EA%3C/text%3E%3C/svg%3E",
+    "gemini": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2322c55e'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='system-ui' font-size='18' fill='%23091a2a'%3EG%3C/text%3E%3C/svg%3E",
+    "sapphire": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230ea5e9'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='system-ui' font-size='18' fill='%23011424'%3ES%3C/text%3E%3C/svg%3E",
+    "freedom": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23f59e0b'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='system-ui' font-size='18' fill='%2307130c'%3EF%3C/text%3E%3C/svg%3E",
+    "boa": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23dc2626'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='system-ui' font-size='18' fill='%23fef2f2'%3EB%3C/text%3E%3C/svg%3E",
+    "qs": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23111827'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' font-family='system-ui' font-size='18' fill='%23f3f4f6'%3EQ%3C/text%3E%3C/svg%3E"
   },
   "categories": {
     "groceries": {
@@ -23,15 +23,55 @@
       "backup": {"name": "Gemini Card", "logo": "gemini"},
       "reason": "3% grocery category"
     },
+    "walmart": {
+      "best": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
+      "reason": "Baseline retail"
+    },
+    "target": {
+      "best": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
+      "reason": "Baseline retail"
+    },
+    "costco": {
+      "best": {"name": "BoA Customized Cash", "logo": "boa"},
+      "backup": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "reason": "Baseline category"
+    },
     "restaurants": {
       "best": {"name": "Gemini Card", "logo": "gemini"},
       "backup": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
       "reason": "3% dining rewards"
     },
+    "starbucks": {
+      "best": {"name": "Gemini Card", "logo": "gemini"},
+      "backup": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "reason": "Dining"
+    },
+    "chipotle": {
+      "best": {"name": "Gemini Card", "logo": "gemini"},
+      "backup": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "reason": "Dining"
+    },
+    "chickfila": {
+      "best": {"name": "Gemini Card", "logo": "gemini"},
+      "backup": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "reason": "Dining"
+    },
     "gas": {
       "best": {"name": "Gemini Card", "logo": "gemini"},
       "backup": {"name": "BoA Customized Cash", "logo": "boa"},
       "reason": "4% gas category"
+    },
+    "shell": {
+      "best": {"name": "Gemini Card", "logo": "gemini"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "Gas"
+    },
+    "bp": {
+      "best": {"name": "Gemini Card", "logo": "gemini"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "Gas"
     },
     "retail": {
       "best": {"name": "Freedom Unlimited", "logo": "freedom"},
@@ -48,10 +88,54 @@
       "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
       "reason": "1.5% uncategorized spending"
     },
+    "netflix": {
+      "best": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
+      "reason": "Subscriptions"
+    },
+    "spotify": {
+      "best": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
+      "reason": "Subscriptions"
+    },
     "travel": {
       "best": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
       "backup": {"name": "BoA Customized Cash", "logo": "boa"},
       "reason": "3x travel points"
+    },
+    "delta": {
+      "best": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "Travel"
+    },
+    "southwest": {
+      "best": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "Travel"
+    },
+    "uber": {
+      "best": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "Travel"
+    },
+    "lyft": {
+      "best": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "Travel"
     }
-  }
+  },
+  "favorites": [
+    {"name": "Publix", "key": "publix"},
+    {"name": "Aldi", "key": "aldi"},
+    {"name": "Walmart", "key": "walmart"},
+    {"name": "Target", "key": "target"},
+    {"name": "Costco", "key": "costco"},
+    {"name": "Starbucks", "key": "starbucks"},
+    {"name": "Chipotle", "key": "chipotle"},
+    {"name": "Shell", "key": "shell"},
+    {"name": "Delta", "key": "delta"},
+    {"name": "Uber", "key": "uber"},
+    {"name": "Netflix", "key": "netflix"},
+    {"name": "Spotify", "key": "spotify"}
+  ]
 }
