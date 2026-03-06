@@ -1,8 +1,8 @@
-// Card Picker (Phantom-ish UI behavior)
-// - Placeholder icon when nothing is selected
-// - Quick pick active state
-// - Fuzzy search
-// - Remembers last selection in localStorage
+// Card Picker - Phantom-ish logic + iOS wheel
+// - Toggle quick-picks (tap again = unselect)
+// - Better search scoring (requires 2+ chars unless exact)
+// - Favorite merchants wheel
+// - Remembers last selection
 
 let data = null
 const state = { activeKey: null }
@@ -16,6 +16,7 @@ const dom = {
   backupTag: document.getElementById('backupTag'),
   reason: document.getElementById('reason'),
   search: document.getElementById('search'),
+  favorites: document.getElementById('favorites')
 }
 
 function svgDataUri(svg){
@@ -49,10 +50,13 @@ function setActiveKey(key){
   try{
     if(key) localStorage.setItem('cp:last', key)
     else localStorage.removeItem('cp:last')
-  } catch(e){}
+  }catch(e){}
 
-  // toggle quick-pick pills
   document.querySelectorAll('.quick button[data-key]').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.key === key)
+  })
+
+  document.querySelectorAll('#favorites button[data-key]').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.key === key)
   })
 }
@@ -61,7 +65,6 @@ function setCard(type, card){
   const logoEl = dom[`${type}Logo`]
   const nameEl = dom[`${type}Name`]
   const tagEl = dom[`${type}Tag`]
-
   if(!logoEl || !nameEl) return
 
   if(card){
@@ -69,7 +72,7 @@ function setCard(type, card){
     logoEl.alt = (card.name || 'Card') + ' logo'
     nameEl.textContent = card.name || '—'
     if(tagEl) tagEl.textContent = card.tag || ''
-  } else {
+  }else{
     logoEl.src = PLACEHOLDER_LOGO
     logoEl.alt = 'No selection'
     nameEl.textContent = '—'
@@ -84,86 +87,94 @@ function resetUI(message){
   if(dom.reason) dom.reason.textContent = message || ''
 }
 
+function scrollFavoriteIntoView(key){
+  if(!dom.favorites || !key) return
+  const btn = dom.favorites.querySelector(`button[data-key="${key}"]`)
+  if(btn) btn.scrollIntoView({ block: 'center', behavior: 'smooth' })
+}
+
+function renderFavorites(){
+  if(!dom.favorites) return
+  dom.favorites.innerHTML = ''
+  const list = data?.favorites || []
+
+  list.forEach(item=>{
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'wheel-item'
+    btn.dataset.key = item.key
+    btn.textContent = item.name
+    dom.favorites.appendChild(btn)
+  })
+
+  dom.favorites.addEventListener('click', e=>{
+    const btn = e.target.closest('button[data-key]')
+    if(!btn) return
+    const k = btn.dataset.key
+    togglePick(k)
+    if(dom.search) dom.search.value = ''
+  })
+}
+
+function score(q, key){
+  if(!q || !key) return 0
+  if(key === q) return 100
+  const starts = key.startsWith(q)
+  const idx = key.indexOf(q)
+  if(starts) return 80 - key.length
+  if(idx === -1) return 0
+  return 40 - idx - key.length
+}
+
 function bestKeyMatch(query){
   if(!data?.categories) return null
-  const keys = Object.keys(data.categories)
   const q = (query||'').trim().toLowerCase()
-  if(!q) return null
+  const keys = Object.keys(data.categories)
+
   if(keys.includes(q)) return q
+  if(q.length < 2) return null
 
-  const starts = keys.filter(k=>k.startsWith(q))
-  if(starts.length) return starts.sort((a,b)=>a.length-b.length || a.localeCompare(b))[0]
+  const scored = keys
+    .map(k=>({ k, s: score(q,k) }))
+    .filter(x=>x.s > 0)
+    .sort((a,b)=> b.s - a.s || a.k.length - b.k.length || a.k.localeCompare(b.k))
 
-  const inc = keys.filter(k=>k.includes(q))
-  if(inc.length) return inc.sort((a,b)=>a.length-b.length || a.localeCompare(b))[0]
-
-  return null
+  return scored.length ? scored[0].k : null
 }
 
 function pick(key){
-  if(!data?.categories) {
-    resetUI('')
-    return
-  }
-
-  const result = data.categories[key]
+  const result = data?.categories?.[key]
   if(!result){
     resetUI('No match')
     return
   }
 
   setActiveKey(key)
+  scrollFavoriteIntoView(key)
+
   setCard('best', {
     name: result.best?.name,
-    logo: result.best?.logo || result.best?.logoKey || result.best?.logoId,
-    tag: result.best?.tag || `Boosted: ${key}`
+    logo: result.best?.logo,
+    tag: result.best?.tag || 'Primary'
   })
+
   setCard('backup', {
     name: result.backup?.name,
-    logo: result.backup?.logo || result.backup?.logoKey || result.backup?.logoId,
+    logo: result.backup?.logo,
     tag: result.backup?.tag || 'Backup'
   })
 
   if(dom.reason) dom.reason.textContent = result.reason || ''
 }
 
-async function init(){
-  await loadData()
-
-  // wire quick buttons
-  document.querySelectorAll('.quick button[data-key]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const k = btn.dataset.key
-      pick(k)
-      if(dom.search){
-        dom.search.value = ''
-      }
-    })
-  })
-
-  // search
-  if(dom.search){
-    dom.search.addEventListener('input', e=>{
-      const q = e.target.value
-      const match = bestKeyMatch(q)
-      if(match){
-        pick(match)
-      } else {
-        resetUI(q ? 'No match' : '')
-      }
-    })
+function togglePick(key){
+  if(state.activeKey === key){
+    resetUI('Pick a category or search a store')
+  }else{
+    pick(key)
   }
-
-  // restore last selection
-  let last = null
-  try{
-    last = localStorage.getItem('cp:last') || null
-  }catch(e){}
-  if(last) pick(last)
-  else resetUI('Pick a category or search a store')
 }
 
-// Load JSON
 async function loadData(){
   try{
     const res = await fetch('cards.json')
@@ -171,6 +182,37 @@ async function loadData(){
   }catch(err){
     console.error('Failed to load cards.json', err)
   }
+}
+
+async function init(){
+  await loadData()
+  renderFavorites()
+
+  document.querySelectorAll('.quick button[data-key]').forEach(btn=>{
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.key
+      togglePick(k)
+      if(dom.search) dom.search.value = ''
+      scrollFavoriteIntoView(k)
+    })
+  })
+
+  if(dom.search){
+    dom.search.addEventListener('input', e=>{
+      const q = e.target.value
+      const match = bestKeyMatch(q)
+      if(match) pick(match)
+      else resetUI(q.trim() ? 'No match' : '')
+    })
+  }
+
+  let last = null
+  try{
+    last = localStorage.getItem('cp:last') || null
+  }catch(e){}
+
+  if(last) pick(last)
+  else resetUI('Pick a category or search a store')
 }
 
 init()
