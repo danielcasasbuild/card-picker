@@ -1,11 +1,11 @@
-const cacheName = 'card-picker-v3'
+const cacheName = 'card-picker-v4'
 const base = self.location.pathname.replace(/\/[^/]*$/, '/')
 const assets = [
   base,
   base + 'index.html',
   base + 'style.css',
   base + 'app.js',
-  base + 'cards.json',
+  base + 'cards.json?v=2',
   base + 'manifest.json',
 ]
 
