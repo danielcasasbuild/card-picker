@@ -1,9 +1,5 @@
-const cacheName = 'card-picker-v2'
-
-// Example: https://danielcasasbuild.github.io/card-picker/
-// Keep caching resilient to being served from a subpath.
+const cacheName = 'card-picker-v3'
 const base = self.location.pathname.replace(/\/[^/]*$/, '/')
-
 const assets = [
   base,
   base + 'index.html',
@@ -31,6 +27,24 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(res => res || fetch(event.request))
+    caches.match(event.request).then(res => {
+      const fetchPromise = fetch(event.request)
+        .then(networkRes => {
+          if (
+            networkRes &&
+            networkRes.status === 200 &&
+            event.request.method === 'GET'
+          ) {
+            caches.open(cacheName).then(cache =>
+              cache.put(event.request, networkRes.clone())
+            )
+          }
+
+          return networkRes
+        })
+        .catch(() => res)
+
+      return res || fetchPromise
+    })
   )
 })
