@@ -4,16 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Card Picker</title>
-
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="style.css">
-
 </head>
-
 <body>
-
 <div class="app">
-
   <div class="topbar">
     <div class="brandmark" aria-hidden="true">CP</div>
     <div>
@@ -25,54 +20,52 @@
     </div>
   </div>
 
-  <div class="search-group">
+  <div class="controls">
     <input id="search" placeholder="Where are you shopping?">
-    <div class="hint">Type a merchant or tap a category</div>
+    <div class="hint">Tap a category button or scroll your favorites</div>
+
+    <div class="quick">
+      <button type="button" data-key="groceries">Groceries</button>
+      <button type="button" data-key="restaurants">Dining</button>
+      <button type="button" data-key="gas">Gas</button>
+      <button type="button" data-key="retail">Retail</button>
+      <button type="button" data-key="travel">Travel</button>
+      <button type="button" data-key="subscriptions">Subscriptions</button>
+    </div>
   </div>
 
-  <div class="quick" aria-label="Quick categories">
-    <button data-key="groceries">Groceries</button>
-    <button data-key="restaurants">Dining</button>
-    <button data-key="gas">Gas</button>
-    <button data-key="retail">Retail</button>
-    <button data-key="travel">Travel</button>
-    <button data-key="subscriptions">Subscriptions</button>
+  <div class="wheel-shell">
+    <div class="wheel-overlay"></div>
+    <div id="favorites" class="wheel"></div>
   </div>
 
-  <div class="cards" aria-label="Recommendations">
+  <div class="cards">
     <div class="card">
-      <h3>Best Card</h3>
-      <div class="card-line">
-        <img id="bestLogo" src="" alt="Best card logo">
-        <div class="card-meta">
+      <div class="card-top">
+        <span class="card-tag" id="bestTag">Primary</span>
+        <div class="card-line">
+          <img id="bestLogo" alt="No selection">
           <div class="card-name" id="bestName">—</div>
-          <div class="card-tag">Primary</div>
         </div>
       </div>
+      <div class="reason" id="reason"></div>
     </div>
 
     <div class="card">
-      <h3>Backup</h3>
-      <div class="card-line">
-        <img id="backupLogo" src="" alt="Backup card logo">
-        <div class="card-meta">
+      <div class="card-top">
+        <span class="card-tag" id="backupTag">Backup</span>
+        <div class="card-line">
+          <img id="backupLogo" alt="No selection">
           <div class="card-name" id="backupName">—</div>
-          <div class="card-tag">Secondary</div>
         </div>
       </div>
     </div>
   </div>
 
-  <p id="reason" class="reason">Pick a category or search.</p>
-
-  <footer class="footer">
-    <span class="ghost-label">Offline-ready</span>
-    <span class="ghost-label">Expandable database</span>
-  </footer>
-
+  <div class="footer">
+    <div class="ghost-label">Offline + installable</div>
+  </div>
 </div>
-
 <script src="app.js"></script>
-
 </body>
 </html>
