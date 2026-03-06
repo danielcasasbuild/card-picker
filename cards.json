@@ -1,0 +1,55 @@
+{
+"groceries":{
+"best":{"name":"Amex Blue Cash Everyday","logo":"amex-bce.png"},
+"backup":{"name":"Gemini Card","logo":"gemini.png"},
+"reason":"3% supermarket rewards"
+},
+
+"publix":{
+"best":{"name":"Amex Blue Cash Everyday","logo":"amex-bce.png"},
+"backup":{"name":"Gemini Card","logo":"gemini.png"},
+"reason":"3% grocery category"
+},
+
+"aldi":{
+"best":{"name":"Amex Blue Cash Everyday","logo":"amex-bce.png"},
+"backup":{"name":"Gemini Card","logo":"gemini.png"},
+"reason":"3% grocery category"
+},
+
+"restaurants":{
+"best":{"name":"Gemini Card","logo":"gemini.png"},
+"backup":{"name":"Chase Sapphire Preferred","logo":"sapphire.png"},
+"reason":"3% dining rewards"
+},
+
+"gas":{
+"best":{"name":"Gemini Card","logo":"gemini.png"},
+"backup":{"name":"BoA Customized Cash","logo":"boa-ccr.png"},
+"reason":"4% gas category"
+},
+
+"retail":{
+"best":{"name":"Freedom Unlimited","logo":"freedom.png"},
+"backup":{"name":"Capital One Quicksilver","logo":"quicksilver.png"},
+"reason":"1.5% baseline rewards"
+},
+
+"amazon":{
+"best":{"name":"Freedom Unlimited","logo":"freedom.png"},
+"backup":{"name":"Capital One Quicksilver","logo":"quicksilver.png"},
+"reason":"1.5% retail"
+},
+
+"subscriptions":{
+"best":{"name":"Freedom Unlimited","logo":"freedom.png"},
+"backup":{"name":"Quicksilver","logo":"quicksilver.png"},
+"reason":"1.5% uncategorized spending"
+},
+
+"travel":{
+"best":{"name":"Chase Sapphire Preferred","logo":"sapphire.png"},
+"backup":{"name":"BoA Customized Cash","logo":"boa-ccr.png"},
+"reason":"3x travel points"
+}
+}
