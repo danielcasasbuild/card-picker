@@ -177,10 +177,10 @@ function togglePick(key){
 
 async function loadData(){
   try{
-    const res = await fetch('cards.json')
+    const res = await fetch('cards.json?v=2')
     data = await res.json()
   }catch(err){
-    console.error('Failed to load cards.json', err)
+    console.error('Failed to load cards.json?v=2', err)
   }
 }
 
