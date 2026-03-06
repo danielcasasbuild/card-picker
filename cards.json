@@ -1,55 +1,57 @@
 {
-"groceries":{
-"best":{"name":"Amex Blue Cash Everyday","logo":"amex-bce.png"},
-"backup":{"name":"Gemini Card","logo":"gemini.png"},
-"reason":"3% supermarket rewards"
-},
-
-"publix":{
-"best":{"name":"Amex Blue Cash Everyday","logo":"amex-bce.png"},
-"backup":{"name":"Gemini Card","logo":"gemini.png"},
-"reason":"3% grocery category"
-},
-
-"aldi":{
-"best":{"name":"Amex Blue Cash Everyday","logo":"amex-bce.png"},
-"backup":{"name":"Gemini Card","logo":"gemini.png"},
-"reason":"3% grocery category"
-},
-
-"restaurants":{
-"best":{"name":"Gemini Card","logo":"gemini.png"},
-"backup":{"name":"Chase Sapphire Preferred","logo":"sapphire.png"},
-"reason":"3% dining rewards"
-},
-
-"gas":{
-"best":{"name":"Gemini Card","logo":"gemini.png"},
-"backup":{"name":"BoA Customized Cash","logo":"boa-ccr.png"},
-"reason":"4% gas category"
-},
-
-"retail":{
-"best":{"name":"Freedom Unlimited","logo":"freedom.png"},
-"backup":{"name":"Capital One Quicksilver","logo":"quicksilver.png"},
-"reason":"1.5% baseline rewards"
-},
-
-"amazon":{
-"best":{"name":"Freedom Unlimited","logo":"freedom.png"},
-"backup":{"name":"Capital One Quicksilver","logo":"quicksilver.png"},
-"reason":"1.5% retail"
-},
-
-"subscriptions":{
-"best":{"name":"Freedom Unlimited","logo":"freedom.png"},
-"backup":{"name":"Quicksilver","logo":"quicksilver.png"},
-"reason":"1.5% uncategorized spending"
-},
-
-"travel":{
-"best":{"name":"Chase Sapphire Preferred","logo":"sapphire.png"},
-"backup":{"name":"BoA Customized Cash","logo":"boa-ccr.png"},
-"reason":"3x travel points"
-}
+  "logos": {
+    "amex": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%232E6AE8'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EBCE%3C/text%3E%3C/svg%3E",
+    "gemini": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%237E3FF2'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EGEM%3C/text%3E%3C/svg%3E",
+    "sapphire": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%230B63CE'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3ESAP%3C/text%3E%3C/svg%3E",
+    "freedom": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%2300A86B'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EFRD%3C/text%3E%3C/svg%3E",
+    "boa": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%23D90429'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EBOA%3C/text%3E%3C/svg%3E",
+    "qs": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36'%3E%3Crect width='36' height='36' fill='%234A5568'/%3E%3Ctext x='50%' y='58%' font-family='Arial, sans-serif' font-size='14' font-weight='700' fill='white' text-anchor='middle'%3EQS%3C/text%3E%3C/svg%3E"
+  },
+  "categories": {
+    "groceries": {
+      "best": {"name": "Amex Blue Cash Everyday", "logo": "amex"},
+      "backup": {"name": "Gemini Card", "logo": "gemini"},
+      "reason": "3% supermarket rewards"
+    },
+    "publix": {
+      "best": {"name": "Amex Blue Cash Everyday", "logo": "amex"},
+      "backup": {"name": "Gemini Card", "logo": "gemini"},
+      "reason": "3% grocery category"
+    },
+    "aldi": {
+      "best": {"name": "Amex Blue Cash Everyday", "logo": "amex"},
+      "backup": {"name": "Gemini Card", "logo": "gemini"},
+      "reason": "3% grocery category"
+    },
+    "restaurants": {
+      "best": {"name": "Gemini Card", "logo": "gemini"},
+      "backup": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "reason": "3% dining rewards"
+    },
+    "gas": {
+      "best": {"name": "Gemini Card", "logo": "gemini"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "4% gas category"
+    },
+    "retail": {
+      "best": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
+      "reason": "1.5% baseline rewards"
+    },
+    "amazon": {
+      "best": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
+      "reason": "1.5% retail"
+    },
+    "subscriptions": {
+      "best": {"name": "Freedom Unlimited", "logo": "freedom"},
+      "backup": {"name": "Capital One Quicksilver", "logo": "qs"},
+      "reason": "1.5% uncategorized spending"
+    },
+    "travel": {
+      "best": {"name": "Chase Sapphire Preferred", "logo": "sapphire"},
+      "backup": {"name": "BoA Customized Cash", "logo": "boa"},
+      "reason": "3x travel points"
+    }
+  }
 }
