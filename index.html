@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Picker</title>
+
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="app">
+
+<h1>Card Picker</h1>
+
+<input id="search" placeholder="Where are you shopping?">
+
+<div class="quick">
+<button onclick="pick('groceries')">Groceries</button>
+<button onclick="pick('restaurants')">Dining</button>
+<button onclick="pick('gas')">Gas</button>
+<button onclick="pick('retail')">Retail</button>
+<button onclick="pick('travel')">Travel</button>
+<button onclick="pick('subscriptions')">Subscriptions</button>
+</div>
+
+<div class="card">
+
+<div class="section">
+<h3>Best Card</h3>
+<div class="card-line">
+<img id="bestLogo">
+<span id="bestName">—</span>
+</div>
+</div>
+
+<div class="section">
+<h3>Backup</h3>
+<div class="card-line">
+<img id="backupLogo">
+<span id="backupName">—</span>
+</div>
+</div>
+
+<p id="reason"></p>
+
+</div>
+
+</div>
+
+<script src="app.js"></script>
+
+</body>
+</html>
