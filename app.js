@@ -1,158 +1,239 @@
-// Card Picker
 const DATA_URL="cards.json?v=3";
 const FAVORITE_H=56;
 const PLACEHOLDER_LOGO='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect width="80" height="80" rx="16" fill="%2322294b" opacity=".22"/%3E%3C/svg%3E';
 let data=null;
 let computed=null;
-const state={activeKey:null,activeCard:null,current:null};
+const state={key:null,activeCard:null};
 const dom={
-search:document.getElementById('search'),
-quick:Array.from(document.querySelectorAll('.quick button[data-key]')),
-favorites:document.getElementById('favorites'),
-cards:Array.from(document.querySelectorAll('.card[data-card]')),
-bestLogo:document.getElementById('bestLogo'),
-bestName:document.getElementById('bestName'),
-bestLabel:document.getElementById('bestLabel'),
-bestReason:document.getElementById('bestReason'),
-backupLogo:document.getElementById('backupLogo'),
-backupName:document.getElementById('backupName'),
-backupLabel:document.getElementById('backupLabel'),
-backupReason:document.getElementById('backupReason'),
-calcSelected:document.getElementById('calcSelected'),
-calcRate:document.getElementById('calcRate'),
-calcInput:document.getElementById('calcInput'),
-calcResult:document.getElementById('calcResult')
+ search:document.getElementById('search'),
+ quick:Array.from(document.querySelectorAll('.quick button[data-key]')),
+ favorites:document.getElementById('favorites'),
+ cards:Array.from(document.querySelectorAll('.card[data-card]')),
+ bestLogo:document.getElementById('bestLogo'),
+ bestName:document.getElementById('bestName'),
+ bestLabel:document.getElementById('bestLabel'),
+ bestReason:document.getElementById('bestReason'),
+ backupLogo:document.getElementById('backupLogo'),
+ backupName:document.getElementById('backupName'),
+ backupLabel:document.getElementById('backupLabel'),
+ backupReason:document.getElementById('backupReason'),
+ calcSelected:document.getElementById('calcSelected'),
+ calcRate:document.getElementById('calcRate'),
+ calcInput:document.getElementById('calcInput'),
+ calcResult:document.getElementById('calcResult')
 };
-function resolveLogo(key){return !key?PLACEHOLDER_LOGO:(key.startsWith('data:')?key:key);} 
+function normalize(s){return (s||"").toLowerCase().trim();}
+function resolveLogo(key){
+ if(!key)return PLACEHOLDER_LOGO;
+ if(key.startsWith('data:'))return key;
+ return key;
+}
+function getEntry(key){return data?.categories?.[key]||null;}
 function getCategory(key){
-if(!key)return null;
-key=String(key).trim().toLowerCase();
-if(!key)return null;
-if(data.aliases&&data.aliases[key])return data.aliases[key];
-if(data.category_order?.includes(key))return key;
-return null;
+ const e=getEntry(key);
+ if(!e) return null;
+ if(e.category) return e.category;
+ if(data?.category_order?.includes(key)) return key;
+ return null;
 }
-function effectiveRate(card,rate){return card.type==='points'?(rate*(card.point_value||0)):rate;}
-function labelFor(card,cat,rate,eff){
-let label=card.labels?.[cat]??card.labels?.default;
-if(!label){label=card.type==='points'?`${rate}x points`:`${(rate*100).toFixed(1)}% cash back`;}
-if(card.type==='points'){label+=` (≈${(eff*100).toFixed(1)}% cash value)`;}
-return label;
+function isCategoryKey(key){return !!(data?.category_order?.includes(key));}
+function favoriteIndex(key){
+ const idx=(data?.favorites||[]).indexOf(key);
+ return idx<0?-1:idx+1;
 }
-function prepCard(cardKey,card,cat){
-const r=card.rates?.[cat];
-const rate=(typeof r==='number'?r:(typeof card.base_rate==='number'?card.base_rate:0));
-const eff=effectiveRate(card,rate);
-return {key:cardKey,name:card.name,logo:data.logos?.[card.logo],effRate:eff,rate,label:labelFor(card,cat,rate,eff),unit:card.unit,type:card.type,pointsPerDollar:card.type==='points'?rate:0};
+let wheelSuppress=false;
+function favoritesShell(){return dom.favorites?.parentElement||null;}
+function scrollFavoriteTo(idx,smooth=true){
+ const sh=favoritesShell();
+ if(!sh)return;
+ wheelSuppress=true;
+ sh.scrollTo({top:idx*FAVORITE_H,behavior:smooth?"smooth":"auto"});
+ setTimeout(()=>wheelSuppress=false,smooth?320:0);
+}
+function setActiveCategory(cat){
+ dom.quick.forEach(btn=>btn.classList.toggle('active',!!cat && btn.dataset.key===cat));
+}
+function clearSearch(){dom.search.value='';}
+function formatPct(rate){const pct=rate*100;return pct%1===0?pct.toFixed(0):pct.toFixed(2);}
+function makeLabel(card,rate,cat){
+ if(card.type==='points'){
+ const unit=card.unit||'points';
+ const lbl=card.labels?.[cat];
+ return lbl || `${rate.toFixed(0)}x ${unit}`;
+ }
+ return `${formatPct(rate)}% cash back`;
 }
 function compute(){
-computed={categories:{}};
-for(const cat of data.category_order||[]){
-const list=[];
-for(const [ck,card] of Object.entries(data.cards||{})){list.push(prepCard(ck,card,cat));}
-list.sort((a,b)=>b.effRate-a.effRate);
-computed.categories[cat]={best:list[0]||null,backup:list[1]||null};
+ const cards={};
+ for(const [key,c] of Object.entries(data.cards)){
+ const logo=data.logos?.[c.logo]||c.logo||PLACEHOLDER_LOGO;
+ cards[key]={...c,key,logo:resolveLogo(logo)};
+ }
+ computed={cards,cardByKey:cards,categories:{}};
+ const cats=data.category_order||[];
+ for(const cat of cats){
+ const ranking=Object.values(cards).map(card=>{
+ const base=card.base_rate||0;
+ let entry=card.rates?.[cat];
+ let rate=base;
+ let label=null;
+ if(entry!=null){
+ if(typeof entry==='object'){rate=entry.rate??base;label=entry.label??null;}
+ else{rate=entry;}
+ }
+ label=label||makeLabel(card,rate,cat);
+ const eff=card.type==='points'?rate*(card.point_value||0):rate;
+ return {cardKey:card.key,card,rate,label,eff};
+ });
+ ranking.sort((a,b)=>b.eff-a.eff);
+ const best=ranking[0];
+ const backup=ranking[1];
+ const makeReason=r=>`≈${formatPct(r.eff)}% cash value`;
+ computed.categories[cat]={
+ best:{cardKey:best.cardKey,card:best.card,label:best.label,reason:makeReason(best)},
+ backup:{cardKey:backup.cardKey,card:backup.card,label:backup.label,reason:makeReason(backup)}
+ };
+ }
+ // search index
+ computed.search=[];
+ for(const [key,entry] of Object.entries(data.categories)){
+ computed.search.push({key,title:normalize(entry.title||key),isCat:isCategoryKey(key)});
+ }
 }
+function setCardSlot(slot,res){
+ const logoEl=slot==='best'?dom.bestLogo:dom.backupLogo;
+ const nameEl=slot==='best'?dom.bestName:dom.backupName;
+ const labelEl=slot==='best'?dom.bestLabel:dom.backupLabel;
+ const reasonEl=slot==='best'?dom.bestReason:dom.backupReason;
+ if(!res){logoEl.src=PLACEHOLDER_LOGO;nameEl.textContent='—';labelEl.textContent='';reasonEl.textContent='';return;}
+ logoEl.src=resolveLogo(res.card.logo);
+ nameEl.textContent=res.card.name||'—';
+ labelEl.textContent=res.label||'';
+ reasonEl.textContent=res.reason||'';
 }
-function clearCard(which){
-dom[which+'Logo'].src=PLACEHOLDER_LOGO;
-dom[which+'Name'].textContent='—';
-dom[which+'Label'].textContent='';
-dom[which+'Reason'].textContent='';
+function setActiveCard(cardKey){
+ state.activeCard=cardKey;
+ dom.cards.forEach(el=>el.classList.toggle('active',el.dataset.card===cardKey));
+ updateCalc();
 }
-function setCard(which,info){
-if(!info){clearCard(which);return;}
-dom[which+'Logo'].src=resolveLogo(info.logo);
-dom[which+'Name'].textContent=info.name||'—';
-dom[which+'Label'].textContent=info.unit||'';
-dom[which+'Reason'].textContent=info.label||'';
+function parseAmount(s){
+ const m=parseFloat((s||'').replace(/[^0-9.]/g,''));
+ return isFinite(m)?m:0;
 }
-function setActiveCard(which){
-state.activeCard=which;
-dom.cards.forEach(c=>c.classList.remove('active'));
-const btn=dom.cards.find(c=>c.dataset.card===which);
-if(btn)btn.classList.add('active');
-updateCalc();
-}
-function setActiveKey(cat){
-state.activeKey=cat;
-dom.quick.forEach(b=>{
-b.classList.remove('active');
-if(cat && getCategory(b.dataset.key)===cat)b.classList.add('active');
-});
-}
-function resetUI(){
-state.current=null;
-setActiveKey(null);
-state.activeCard=null;
-clearCard('best');
-clearCard('backup');
-dom.calcSelected.textContent='—';
-dom.calcRate.textContent='—';
-dom.calcInput.value='';
-dom.calcResult.textContent='$0.00';
-}
-function pick(key){
-if(!data||!computed)return;
-const cat=getCategory(key);
-if(!cat){resetUI();return;}
-state.current=computed.categories[cat]||null;
-if(!state.current){resetUI();return;}
-setActiveKey(cat);
-setCard('best',state.current.best);
-setCard('backup',state.current.backup);
-setActiveCard('best');
-}
-function parseAmount(v){
-if(!v)return 0;
-v=String(v).replace(/[^0-9.]/g,'');
-if(!v)return 0;
-const x=parseFloat(v);
-return isNaN(x)?0:x;
-}
+function formatUSD(n){return n>0?`$${n.toFixed(2)}`:'';}
 function updateCalc(){
-const cur=state.current;
-if(!cur||!state.activeCard){
-dom.calcSelected.textContent='—';
-dom.calcRate.textContent='—';
-dom.calcResult.textContent='$0.00';
-return;
+ const amt=parseAmount(dom.calcInput.value);
+ if(!state.activeCard || !computed?.cards?.[state.activeCard]){dom.calcSelected.textContent='—';dom.calcRate.textContent='';dom.calcResult.textContent='';return;}
+ const card=computed.cards[state.activeCard];
+ // find effective info for current category
+ const cat=getCategory(state.key)||data.category_order?.[0]||null;
+ const res=computed.categories[cat]?.best?.cardKey===card.key?computed.categories[cat].best:computed.categories[cat]?.backup?.cardKey===card.key?computed.categories[cat].backup:null;
+ const rate=res?.rate ?? 0;
+ if(card.type==='points'){
+ const pts=amt*rate;
+ const cash=pts*(card.point_value||0);
+ dom.calcSelected.textContent=card.name||'—';
+ dom.calcRate.textContent=res?.label||'';
+ dom.calcResult.textContent=pts>0?`${pts.toFixed(1)} ${card.unit||'points'} (~${formatUSD(cash)})`:'';
+ }else{
+ const reward=amt*rate;
+ dom.calcSelected.textContent=card.name||'—';
+ dom.calcRate.textContent=res?.label||'';
+ dom.calcResult.textContent=reward>0?`${formatUSD(reward)} cash back`:'';
+ }
 }
-const info=cur[state.activeCard];
-if(!info){dom.calcSelected.textContent='—';dom.calcRate.textContent='—';dom.calcResult.textContent='$0.00';return;}
-const amount=parseAmount(dom.calcInput.value);
-const rewardVal=amount*(info.effRate||0);
-if(info.type==='points'){
-const pts=amount*(info.pointsPerDollar||0);
-dom.calcSelected.textContent=info.name;
-dom.calcRate.textContent=info.label;
-dom.calcResult.textContent=`${Math.round(pts)} ${info.unit} (≈$${rewardVal.toFixed(2)})`;
-}else{
-dom.calcSelected.textContent=info.name;
-dom.calcRate.textContent=info.label;
-dom.calcResult.textContent=`$${rewardVal.toFixed(2)}`;
-}
+function resetUI(){state.key=null;state.activeCard=null;setActiveCategory(null);dom.cards.forEach(el=>el.classList.remove('active'));setCardSlot('best');setCardSlot('backup');updateCalc();}
+function pick(key){
+ const cat=getCategory(key);
+ if(!cat||!computed){resetUI();return;}
+ state.key=key;
+ setActiveCategory(cat);
+ const res=computed.categories[cat];
+ setCardSlot('best',res.best);
+ setCardSlot('backup',res.backup);
+ setActiveCard(res.best.cardKey);
 }
 function bestKeyMatch(q){
-if(!data||!q)return null;
-q=String(q).trim().toLowerCase();
-if(!q||q.length<2)return null;
-const candidates=new Set([...(Object.keys(data.aliases||{})),...(data.category_order||[])]);
-let best=null,bScore=-1;
-for(const key of candidates){
-const k=key.toLowerCase();
-if(k===q)return key;
-let score=0;
-if(k.startsWith(q))score=100-q.length;
-else if(k.includes(q))score=50-q.length;
-if(score>bScore){best=key;bScore=score;}
+ const idx=computed.search;
+ let best=null;
+ let score=-1;
+ const isExact=(a,b)=>a===b;
+ for(const entry of idx){
+ if(!entry.title.includes(q) && !entry.key.includes(q)) continue;
+ let s=0;
+ if(isExact(entry.title,q) || isExact(entry.key,q)) s=1000;
+ else if(entry.title.startsWith(q) || entry.key.startsWith(q)) s=200;
+ else s=50;
+ if(!entry.isCat) s+=10; // prefer merchants
+ if(s>score){score=s;best=entry.key;}
+ }
+ return best;
 }
-return best;
+async function load(){
+ const res=await fetch(DATA_URL);
+ data=await res.json();
+ compute();
+ render();
+ resetUI();
 }
-function setupSearch(){dom.search?.addEventListener('input',e=>{const key=bestKeyMatch(e.target.value);if(key)pick(key);else resetUI();});}
-function setupQuick(){dom.quick.forEach(btn=>btn.addEventListener('click',()=>{pick(btn.dataset.key);}));}
-function favoritesShell(){return dom.favorites?.parentElement;}
-function renderFavorites(){const shell=favoritesShell();if(!shell||!dom.favorites)return;dom.favorites.innerHTML='';const items=['-'].concat(data.favorites||[]);for(const k of items){const btn=document.createElement('button');btn.dataset.key=k;btn.textContent=k;dom.favorites.appendChild(btn);}shell.scrollTo({top:0});if(renderFavorites.ready)return;renderFavorites.ready=true;let ticking=false;shell.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;const idx=Math.round(shell.scrollTop/FAVORITE_H);shell.scrollTo({top:idx*FAVORITE_H,behavior:'smooth'});const btn=dom.favorites.querySelectorAll('button')[idx];const key=btn?.dataset.key||'';if(!key||key==='-'){resetUI();return;}pick(key);});});}
-function setupCardTaps(){dom.cards.forEach(btn=>btn.addEventListener('click',()=>setActiveCard(btn.dataset.card)));dom.calcInput?.addEventListener('input',updateCalc);}
-async function loadData(){const res=await fetch(DATA_URL);data=await res.json();compute();renderFavorites();resetUI();}
-setupSearch();setupQuick();setupCardTaps();loadData();
+function render(){
+ // render favorites wheel with '-'
+ dom.favorites.innerHTML='';
+ const placeholder=document.createElement('button');
+ placeholder.textContent='-';
+ placeholder.dataset.key='';
+ dom.favorites.appendChild(placeholder);
+ for(const key of data.favorites||[]){
+ const entry=getEntry(key)||{};
+ const btn=document.createElement('button');
+ btn.textContent=entry.title||key;
+ btn.dataset.key=key;
+ dom.favorites.appendChild(btn);
+ }
+ // category buttons already in DOM
+ // attach card click
+ dom.cards.forEach(card=>card.addEventListener('click',()=>{
+ const k=card.dataset.card;
+ setActiveCard(k);
+ }));
+ // search
+ dom.search.addEventListener('input',()=>{
+ const q=normalize(dom.search.value);
+ if(!q){resetUI();setActiveCategory(null);scrollFavoriteTo(0,false);return;}
+ const best=bestKeyMatch(q);
+ if(!best){resetUI();setActiveCategory(null);scrollFavoriteTo(0,false);return;}
+ const cat=getCategory(best);
+ setActiveCategory(cat);
+ const favIdx=favoriteIndex(best);
+ if(favIdx>=0) scrollFavoriteTo(favIdx,true); else scrollFavoriteTo(0,false);
+ pick(best);
+ });
+ // quick categories
+ dom.quick.forEach(btn=>btn.addEventListener('click',()=>{
+ const key=btn.dataset.key;
+ clearSearch();
+ scrollFavoriteTo(0,true);
+ pick(key);
+ }));
+ // favorites scroll wheel
+ const shell=favoritesShell();
+ if(shell){
+ shell.addEventListener('scroll',()=>{
+ if(wheelSuppress) return;
+ const idx=Math.round(shell.scrollTop/FAVORITE_H);
+ if(idx<=0){ // no favorite selection
+ return;
+ }
+ const btn=dom.favorites.children[idx];
+ const key=btn?.dataset.key;
+ if(!key) return;
+ clearSearch();
+ const cat=getCategory(key);
+ setActiveCategory(cat);
+ pick(key);
+ });
+ }
+ // calculator
+ dom.calcInput.addEventListener('input',updateCalc);
+}
+load().catch(()=>{});
