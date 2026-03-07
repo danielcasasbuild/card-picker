@@ -1,35 +1,158 @@
 // Card Picker
-let data=null;
-const state={activeKey:null,activeCard:null,current:null};
-const dom={bestLogo:document.getElementById("bestLogo"),bestName:document.getElementById("bestName"),bestLabel:document.getElementById("bestLabel"),bestReason:document.getElementById("bestReason"),backupLogo:document.getElementById("backupLogo"),backupName:document.getElementById("backupName"),backupLabel:document.getElementById("backupLabel"),backupReason:document.getElementById("backupReason"),quick:document.querySelectorAll(".quick button"),favorites:document.getElementById("favorites"),cards:document.querySelectorAll('.card[data-card]'),search:document.getElementById("search"),calcSelected:document.getElementById("calcSelected"),calcRate:document.getElementById("calcRate"),calcInput:document.getElementById("calcInput"),calcResult:document.getElementById("calcResult")};
-const DATA_URL="cards.json?v=2";
+const DATA_URL="cards.json?v=3";
 const FAVORITE_H=56;
 const PLACEHOLDER_LOGO='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Crect width="80" height="80" rx="16" fill="%2322294b" opacity=".22"/%3E%3C/svg%3E';
-function resolveLogo(key){if(!key)return PLACEHOLDER_LOGO;if(key.startsWith('data:')||key.startsWith('http'))return key;return (data?.logos?.[key]||PLACEHOLDER_LOGO);}
-function clearCard(t){dom[t+"Logo"].src=PLACEHOLDER_LOGO;dom[t+"Name"].textContent='—';dom[t+"Label"].textContent='';dom[t+"Reason"].textContent='';}
-function setCard(t,card){if(!card){clearCard(t);return;}dom[t+"Logo"].src=resolveLogo(card.logo||card.key||card.name);dom[t+"Name"].textContent=card.name||'—';dom[t+"Label"].textContent=card.label||'';dom[t+"Reason"].textContent=card.reason||'';}
-function favoritesShell(){return dom.favorites.parentElement;}
-function scrollFavoriteTo(index){const shell=favoritesShell();shell.scrollTo({top:index*FAVORITE_H,behavior:'smooth'});} 
-function setActiveKey(key){state.activeKey=key;
-// categories
-for(const b of dom.quick){b.classList.remove('active');if(key&&b.dataset.key===key)b.classList.add('active');}
-// favorites highlight only if it exists
-if(dom.favorites){const btns=dom.favorites.querySelectorAll('button');for(const b of btns){b.classList.remove('active');if(key!==null&&key!==undefined&&b.dataset.key===String(key))b.classList.add('active');}}
+let data=null;
+let computed=null;
+const state={activeKey:null,activeCard:null,current:null};
+const dom={
+search:document.getElementById('search'),
+quick:Array.from(document.querySelectorAll('.quick button[data-key]')),
+favorites:document.getElementById('favorites'),
+cards:Array.from(document.querySelectorAll('.card[data-card]')),
+bestLogo:document.getElementById('bestLogo'),
+bestName:document.getElementById('bestName'),
+bestLabel:document.getElementById('bestLabel'),
+bestReason:document.getElementById('bestReason'),
+backupLogo:document.getElementById('backupLogo'),
+backupName:document.getElementById('backupName'),
+backupLabel:document.getElementById('backupLabel'),
+backupReason:document.getElementById('backupReason'),
+calcSelected:document.getElementById('calcSelected'),
+calcRate:document.getElementById('calcRate'),
+calcInput:document.getElementById('calcInput'),
+calcResult:document.getElementById('calcResult')
+};
+function resolveLogo(key){return !key?PLACEHOLDER_LOGO:(key.startsWith('data:')?key:key);} 
+function getCategory(key){
+if(!key)return null;
+key=String(key).trim().toLowerCase();
+if(!key)return null;
+if(data.aliases&&data.aliases[key])return data.aliases[key];
+if(data.category_order?.includes(key))return key;
+return null;
 }
-function setActiveCard(which){state.activeCard=which;for(const c of dom.cards){c.classList.toggle('active',c.dataset.card===which);}updateCalc();}
-function resetUI(){state.current=null;setActiveKey(null);state.activeCard=null;clearCard('best');clearCard('backup');dom.calcSelected.textContent='—';dom.calcRate.textContent='—';dom.calcResult.textContent='—';dom.calcInput.value='';}
-function pick(key){if(!data)return;const cat=data.categories?.[key];if(!cat){resetUI();return;}state.current=cat;setActiveKey(key);setCard('best',cat.best);setCard('backup',cat.backup);if(!state.activeCard)setActiveCard('best');else updateCalc();}
-function parseAmount(v){if(!v)return 0;v=v.replace(/[^0-9.]/g,'');if(!v)return 0;return parseFloat(v)||0;}
-function updateCalc(){if(!state.current||!state.activeCard){dom.calcSelected.textContent='—';dom.calcRate.textContent='—';dom.calcResult.textContent='—';return;}const card=state.activeCard==='best'?state.current.best:state.current.backup;dom.calcSelected.textContent=card?.name||'—';dom.calcRate.textContent=card?.label||'—';const amt=parseAmount(dom.calcInput.value);const reward=(amt*((card?.rate)||0));dom.calcResult.textContent= reward?`$${reward.toFixed(2)}`:'$0.00';}
-function bestKeyMatch(q){if(!data||!q)return null;q=q.trim().toLowerCase();if(!q)return null;const cats=data.categories||{};if(cats[q])return q;if(q.length<2)return null;let best=null,bScore=-1;for(const key of Object.keys(cats)){const k=key.toLowerCase();let score=-1;if(k===q)score=100;if(score<0&&k.startsWith(q))score=70-q.length; if(score<0 && k.includes(q))score=40-q.length;
-if(score> bScore){best=key;bScore=score;}}return best;}
-function setupSearch(){dom.search?.addEventListener('input',e=>{const q=e.target.value;const key=bestKeyMatch(q);if(key){pick(key);} else{resetUI();}});}
-function setupQuick(){dom.quick.forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.key;setActiveKey(key);pick(key);scrollFavoriteTo(0);}));}
-function renderFavorites(){if(!dom.favorites)return;dom.favorites.innerHTML='';const base=[''];const list=(data?.favorites||[]);const favKeys=base.concat(list.map(x=>String(x)));
-favKeys.forEach(key=>{const btn=document.createElement('button');btn.dataset.key=key;btn.textContent=key?key:'-';dom.favorites.appendChild(btn);});setupWheelScroll(favKeys);scrollFavoriteTo(0);resetUI();}
-function setupWheelScroll(favKeys){const shell=favoritesShell();if(!shell)return;let ticking=false;const snap=()=>{ticking=false;const max=favKeys.length-1;let idx=Math.round(shell.scrollTop/FAVORITE_H);if(idx<0)idx=0;if(idx>max)idx=max;const key=favKeys[idx];shell.scrollTo({top:idx*FAVORITE_H,behavior:'smooth'});
-if(idx===0){if(state.activeKey!==null){resetUI();}} else if(key && key!==state.activeKey){pick(key);} };shell.removeEventListener('scroll',shell._wheelListener||(()=>{}));shell._wheelListener=( )=>{if(!ticking){ticking=true;requestAnimationFrame(snap);} };shell.addEventListener('scroll',shell._wheelListener);}
-function setupCards(){dom.cards.forEach(btn=>btn.addEventListener('click',()=>setActiveCard(btn.dataset.card)));dom.calcInput?.addEventListener('input',updateCalc);} 
-async function load(){const res=await fetch(DATA_URL,{cache:'no-store'});data=await res.json();renderFavorites();setupSearch();setupQuick();setupCards();}
-load();
-if('serviceWorker' in navigator){navigator.serviceWorker.register('service-worker.js');}
+function effectiveRate(card,rate){return card.type==='points'?(rate*(card.point_value||0)):rate;}
+function labelFor(card,cat,rate,eff){
+let label=card.labels?.[cat]??card.labels?.default;
+if(!label){label=card.type==='points'?`${rate}x points`:`${(rate*100).toFixed(1)}% cash back`;}
+if(card.type==='points'){label+=` (≈${(eff*100).toFixed(1)}% cash value)`;}
+return label;
+}
+function prepCard(cardKey,card,cat){
+const r=card.rates?.[cat];
+const rate=(typeof r==='number'?r:(typeof card.base_rate==='number'?card.base_rate:0));
+const eff=effectiveRate(card,rate);
+return {key:cardKey,name:card.name,logo:data.logos?.[card.logo],effRate:eff,rate,label:labelFor(card,cat,rate,eff),unit:card.unit,type:card.type,pointsPerDollar:card.type==='points'?rate:0};
+}
+function compute(){
+computed={categories:{}};
+for(const cat of data.category_order||[]){
+const list=[];
+for(const [ck,card] of Object.entries(data.cards||{})){list.push(prepCard(ck,card,cat));}
+list.sort((a,b)=>b.effRate-a.effRate);
+computed.categories[cat]={best:list[0]||null,backup:list[1]||null};
+}
+}
+function clearCard(which){
+dom[which+'Logo'].src=PLACEHOLDER_LOGO;
+dom[which+'Name'].textContent='—';
+dom[which+'Label'].textContent='';
+dom[which+'Reason'].textContent='';
+}
+function setCard(which,info){
+if(!info){clearCard(which);return;}
+dom[which+'Logo'].src=resolveLogo(info.logo);
+dom[which+'Name'].textContent=info.name||'—';
+dom[which+'Label'].textContent=info.unit||'';
+dom[which+'Reason'].textContent=info.label||'';
+}
+function setActiveCard(which){
+state.activeCard=which;
+dom.cards.forEach(c=>c.classList.remove('active'));
+const btn=dom.cards.find(c=>c.dataset.card===which);
+if(btn)btn.classList.add('active');
+updateCalc();
+}
+function setActiveKey(cat){
+state.activeKey=cat;
+dom.quick.forEach(b=>{
+b.classList.remove('active');
+if(cat && getCategory(b.dataset.key)===cat)b.classList.add('active');
+});
+}
+function resetUI(){
+state.current=null;
+setActiveKey(null);
+state.activeCard=null;
+clearCard('best');
+clearCard('backup');
+dom.calcSelected.textContent='—';
+dom.calcRate.textContent='—';
+dom.calcInput.value='';
+dom.calcResult.textContent='$0.00';
+}
+function pick(key){
+if(!data||!computed)return;
+const cat=getCategory(key);
+if(!cat){resetUI();return;}
+state.current=computed.categories[cat]||null;
+if(!state.current){resetUI();return;}
+setActiveKey(cat);
+setCard('best',state.current.best);
+setCard('backup',state.current.backup);
+setActiveCard('best');
+}
+function parseAmount(v){
+if(!v)return 0;
+v=String(v).replace(/[^0-9.]/g,'');
+if(!v)return 0;
+const x=parseFloat(v);
+return isNaN(x)?0:x;
+}
+function updateCalc(){
+const cur=state.current;
+if(!cur||!state.activeCard){
+dom.calcSelected.textContent='—';
+dom.calcRate.textContent='—';
+dom.calcResult.textContent='$0.00';
+return;
+}
+const info=cur[state.activeCard];
+if(!info){dom.calcSelected.textContent='—';dom.calcRate.textContent='—';dom.calcResult.textContent='$0.00';return;}
+const amount=parseAmount(dom.calcInput.value);
+const rewardVal=amount*(info.effRate||0);
+if(info.type==='points'){
+const pts=amount*(info.pointsPerDollar||0);
+dom.calcSelected.textContent=info.name;
+dom.calcRate.textContent=info.label;
+dom.calcResult.textContent=`${Math.round(pts)} ${info.unit} (≈$${rewardVal.toFixed(2)})`;
+}else{
+dom.calcSelected.textContent=info.name;
+dom.calcRate.textContent=info.label;
+dom.calcResult.textContent=`$${rewardVal.toFixed(2)}`;
+}
+}
+function bestKeyMatch(q){
+if(!data||!q)return null;
+q=String(q).trim().toLowerCase();
+if(!q||q.length<2)return null;
+const candidates=new Set([...(Object.keys(data.aliases||{})),...(data.category_order||[])]);
+let best=null,bScore=-1;
+for(const key of candidates){
+const k=key.toLowerCase();
+if(k===q)return key;
+let score=0;
+if(k.startsWith(q))score=100-q.length;
+else if(k.includes(q))score=50-q.length;
+if(score>bScore){best=key;bScore=score;}
+}
+return best;
+}
+function setupSearch(){dom.search?.addEventListener('input',e=>{const key=bestKeyMatch(e.target.value);if(key)pick(key);else resetUI();});}
+function setupQuick(){dom.quick.forEach(btn=>btn.addEventListener('click',()=>{pick(btn.dataset.key);}));}
+function favoritesShell(){return dom.favorites?.parentElement;}
+function renderFavorites(){const shell=favoritesShell();if(!shell||!dom.favorites)return;dom.favorites.innerHTML='';const items=['-'].concat(data.favorites||[]);for(const k of items){const btn=document.createElement('button');btn.dataset.key=k;btn.textContent=k;dom.favorites.appendChild(btn);}shell.scrollTo({top:0});if(renderFavorites.ready)return;renderFavorites.ready=true;let ticking=false;shell.addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{ticking=false;const idx=Math.round(shell.scrollTop/FAVORITE_H);shell.scrollTo({top:idx*FAVORITE_H,behavior:'smooth'});const btn=dom.favorites.querySelectorAll('button')[idx];const key=btn?.dataset.key||'';if(!key||key==='-'){resetUI();return;}pick(key);});});}
+function setupCardTaps(){dom.cards.forEach(btn=>btn.addEventListener('click',()=>setActiveCard(btn.dataset.card)));dom.calcInput?.addEventListener('input',updateCalc);}
+async function loadData(){const res=await fetch(DATA_URL);data=await res.json();compute();renderFavorites();resetUI();}
+setupSearch();setupQuick();setupCardTaps();loadData();
